@@ -17,7 +17,7 @@ Pinout:
  9 - Acknowledge (Console CPU Interrupt)
  
  Electrical:
- Signal lines have diode protection to ground and series ferrite beads. Data line is pulled up to 3.3V with 1Kohm. 
+ Signal lines are 3.3V logic level and have diode protection to ground and series ferrite beads. Data line is pulled up to 3.3V with 1Kohm. 
  After beads/diodes/pull-ups, signal lines have series 470 ohm resistors (likely to reduce EMI.)
  3.3V and 8V power have 1uH inductors.
  
