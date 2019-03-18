@@ -1,0 +1,73 @@
+PLAYSTATION/PLAYSTATION 2 CONTROLLER INTERFACE
+
+Pinout:
+\-------------------------/
+ \ o o o | o o o | o o o /
+  \---------------------/
+   1 2 3   4 5 6   7 8 9
+ (Looking into male plug from controller)
+ 1 - Data (Controller->Console)
+ 2 - Command (Console->Controller)
+ 3 - 8V Power Supply (Vibration)
+ 4 - Ground
+ 5 - 3.3V Power Supply (Logic)
+ 6 - Attention (Slave Select#)
+ 7 - Clock (Console->Controller)
+ 8 - N/C
+ 9 - Acknowledge (Console CPU Interrupt)
+ 
+ Electrical:
+ Signal lines have diode protection to ground and series ferrite beads. Data line is pulled up to 3.3V with 1Kohm. 
+ After beads/diodes/pull-ups, signal lines have series 470 ohm resistors (likely to reduce EMI.)
+ 3.3V and 8V power have 1uH inductors.
+ 
+ Protocol:
+ This controller interface uses a synchronous serial interface most like SPI Mode 3, with LSB shifted out first.
+ Attention is the active-low slave select line. Acknowledge is an interrupt line to the PlayStation CPU, it is not
+ required to communicate with a controller. A controller toggles acknowledge to let the console know there's more 
+ data to receive. 
+ 
+ 1. The console first asserts Attention and sends command 0x01 to begin communication. Data 0xFF is received.
+ 2. The next command byte sent is the controller command, for instance 0x42 for polling button and axis states.
+    Data byte received contains the controller mode (upper nibble) and data length in 16-bit words.
+ 3. Next, the console sends command 0x00. The controller replies with 0x5A.
+ 4 to n. The console might send some vibration motor commands if so configured, otherwise sends 0x00 and receives
+         controller data.
+         
+Controller Modes:
+  0x1 - Mouse   0x4 - Digital   0x2 - NeGcon   0x7 - Analog   0x5 - Flight Stick    0xF - Escape
+  
+Controller Button Mapping:
+  0x1 - Mouse
+    Byte 1: Always 0xFF
+    Byte 2: Left Button (0x02), Right Button (0x04)
+    Byte 3: Delta Vertical
+    Byte 4: Delta Horizontal
+
+  0x2 - NeGcon
+    Byte 1: Start (0x08), Up (0x10), Right (0x20), Down (0x40), Left (0x80)
+    Byte 2: R1 (0x08), A (0x10), B (0x20)
+    Byte 3: Steering (0x00 = Right, 0xFF = Left)
+    Byte 4: I Button (0x00 = Out, 0xFF = In)
+    Byte 5: II Button (0x00 = Out, 0xFF = In)
+    Byte 6: L1 Button (0x00 = Out, 0xFF = In)
+    
+  0x4 - Digital
+    Byte 1: Select (0x01), Start (0x08), Up (0x10), Right (0x20), Down (0x40), Left (0x80)
+    Byte 2: L2 (0x01), R2 (0x02), L1 (0x04), R1 (0x08), Triangle (0x10), Circle (0x20), Cross (0x40), Square (0x80)
+    
+  0x5 - Flight Stick
+    Byte 1: Start (0x08), Up (0x10), Right (0x20), Down (0x40), Left (0x80)
+    Byte 2: L2 (0x01), L1 (0x02), Square (0x04), Triangle (0x08), R1 (0x10), Circle (0x20), Cross (0x40), R2 (0x80)
+    Byte 3: RStick X (0x00 = Left, 0xFF = Right)
+    Byte 4: RStick Y (0x00 = Up, 0xFF = Down)
+    Byte 5: LStick X (0x00 = Left, 0xFF = Right)
+    Byte 6: LStick Y (0x00 = Up, 0xFF = Down)
+    
+  0x7 - Analog
+    Byte 1: Select (0x01), R3 (0x02), L3 (0x04), Start (0x08), Up (0x10), Right (0x20), Down (0x40), Left (0x80)
+    Byte 2: L2 (0x01), R2 (0x02), L1 (0x04), R1 (0x08), Triangle (0x10), Circle (0x20), Cross (0x40), Square (0x80)
+    Byte 3: RStick X (0x00 = Left, 0xFF = Right)
+    Byte 4: RStick Y (0x00 = Up, 0xFF = Down)
+    Byte 5: LStick X (0x00 = Left, 0xFF = Right)
+    Byte 6: LStick Y (0x00 = Up, 0xFF = Down)
